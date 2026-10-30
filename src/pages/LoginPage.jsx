@@ -133,7 +133,7 @@ export default function LoginPage({ onLoginSuccess }) {
                   <input 
                     className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:border-primary focus:ring-0 input-glow transition-all" 
                     id="name" 
-                    placeholder="John Doe" 
+                    placeholder="name" 
                     required 
                     type="text"
                     value={name}
@@ -152,7 +152,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 <input 
                   className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:border-primary focus:ring-0 input-glow transition-all" 
                   id="email" 
-                  placeholder="analyst@firm.com" 
+                  placeholder="email@provider.com" 
                   required 
                   type="email"
                   value={email}
@@ -175,7 +175,7 @@ export default function LoginPage({ onLoginSuccess }) {
                 <input 
                   className="block w-full pl-10 pr-10 py-2 border border-outline-variant rounded-DEFAULT bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:border-primary focus:ring-0 input-glow transition-all" 
                   id="password" 
-                  placeholder="••••••••" 
+                  placeholder="" 
                   required 
                   type={showPassword ? 'text' : 'password'}
                   value={password}
@@ -203,7 +203,7 @@ export default function LoginPage({ onLoginSuccess }) {
                   <input 
                     className="block w-full pl-10 pr-3 py-2 border border-outline-variant rounded-DEFAULT bg-surface-container-lowest text-on-surface font-body-md text-body-md focus:border-primary focus:ring-0 input-glow transition-all" 
                     id="confirmPassword" 
-                    placeholder="••••••••" 
+                    placeholder="" 
                     required 
                     type="password"
                     value={confirmPassword}
