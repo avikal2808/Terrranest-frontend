@@ -8,10 +8,10 @@ export default function PropertyCard({ property, isSelected, onSelect }) {
     setBookmarked(!bookmarked)
   }
 
-  // Format price
-  const formattedPrice = new Intl.NumberFormat('en-US', {
+  // Indian market, so format in rupees with lakh/crore digit grouping.
+  const formattedPrice = new Intl.NumberFormat('en-IN', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'INR',
     maximumFractionDigits: 0
   }).format(property.price)
 
