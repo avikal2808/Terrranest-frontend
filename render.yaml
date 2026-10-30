@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: terranest-frontend
+    runtime: static
+    branch: main
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      # Vite 5 requires Node 18+; pin it so the build does not break if
+      # Render's default Node version changes.
+      - key: NODE_VERSION
+        value: "20"
