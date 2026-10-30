@@ -12,21 +12,6 @@ export default function SideNavBar() {
 
   return (
     <nav className="bg-surface border-r border-outline-variant w-[240px] flex-shrink-0 flex-col py-margin-sm hidden md:flex">
-      {/* Brand Icon & Name */}
-      <div className="px-gutter mb-6">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 bg-primary-container rounded-lg flex items-center justify-center">
-            <span className="material-symbols-outlined text-on-primary-container text-2xl" style={{ fontVariationSettings: "'FILL' 1" }}>
-              real_estate_agent
-            </span>
-          </div>
-          <div>
-            <div className="font-headline-md text-label-md font-black text-primary leading-tight">Global Realty</div>
-            <div className="font-label-md text-[10px] text-secondary uppercase tracking-wider">Institutional Grade</div>
-          </div>
-        </div>
-      </div>
-
       {/* Nav List */}
       <ul className="flex flex-col gap-1 px-4">
         {navItems.map((item) => {

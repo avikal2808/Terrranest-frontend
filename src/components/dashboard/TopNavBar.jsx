@@ -53,7 +53,12 @@ export default function TopNavBar({ user, onSearch, onFilterChange, onAnalyze, o
   return (
     <header className="bg-surface-container-lowest border-b border-outline-variant fixed top-0 left-0 w-full z-50 flex flex-col px-margin-sm md:px-margin-md h-auto shadow-none py-3 gap-3">
       <div className="flex items-center justify-between w-full h-10">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 bg-primary-container rounded-lg flex items-center justify-center">
+            <span className="material-symbols-outlined text-on-primary-container text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+              real_estate_agent
+            </span>
+          </div>
           <span className="font-headline-md text-headline-md font-bold text-primary">TerraNest</span>
         </div>
         
