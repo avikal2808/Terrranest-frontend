@@ -10,6 +10,7 @@ export default function DashboardPage({ user, onLogout }) {
   const [properties, setProperties] = useState([])
   const [selectedPropertyId, setSelectedPropertyId] = useState(null)
   const [detailProperty, setDetailProperty] = useState(null)
+  const [showComingSoon, setShowComingSoon] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
@@ -70,7 +71,7 @@ export default function DashboardPage({ user, onLogout }) {
   }
 
   const handleAnalyze = () => {
-    alert('Initiating real estate valuation analysis for the active listings grid...')
+    setShowComingSoon(true)
   }
 
   // Opening a listing replaces the dashboard with its own full-screen page.
@@ -112,6 +113,31 @@ export default function DashboardPage({ user, onLogout }) {
           />
         </div>
       </main>
+
+      {/* Coming Soon Modal */}
+      {showComingSoon && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-inverse-surface/40 backdrop-blur-sm"
+            onClick={() => setShowComingSoon(false)}
+          ></div>
+          <div className="relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-2xl max-w-sm w-full p-8 text-center animate-in fade-in zoom-in duration-300">
+            <div className="w-16 h-16 bg-primary-container/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="material-symbols-outlined text-primary text-3xl">analytics</span>
+            </div>
+            <h3 className="font-headline-md text-on-surface mb-2">Advanced Analytics</h3>
+            <p className="font-body-md text-secondary mb-8">
+              Deep-dive valuation and ROI prediction features will be available very soon.
+            </p>
+            <button 
+              onClick={() => setShowComingSoon(false)}
+              className="w-full py-3 px-6 bg-primary text-on-primary rounded-xl font-label-md hover:bg-primary-container hover:text-on-primary-container transition-all shadow-md active:scale-[0.98]"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
