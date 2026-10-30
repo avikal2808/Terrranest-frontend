@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import PropertyCard from './PropertyCard'
 
-export default function PropertyList({ properties, loading, error, selectedPropertyId, onSelectProperty }) {
+export default function PropertyList({ properties, loading, error, selectedPropertyId, onSelectProperty, onOpenProperty }) {
   const listContainerRef = useRef(null)
 
   // Scroll to active card when selectedPropertyId changes
@@ -56,7 +56,7 @@ export default function PropertyList({ properties, loading, error, selectedPrope
               <PropertyCard
                 property={property}
                 isSelected={selectedPropertyId === property.id}
-                onSelect={() => onSelectProperty(property.id)}
+                onOpen={onOpenProperty}
               />
             </div>
           ))

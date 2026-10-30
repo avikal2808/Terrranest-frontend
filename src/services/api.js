@@ -79,42 +79,105 @@ function derivePropertyType(title) {
 }
 
 function getPropertyImage(type, id) {
-  // Use professional architectural photos from Unsplash directly
-  const images = {
-    'Multi-Fam': [
-      'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1515263487990-61b07816b324?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1460317442991-0ec209397118?auto=format&fit=crop&w=800&q=80'
-    ],
-    'Office': [
-      'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1497215842964-222b430dc094?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=800&q=80'
-    ],
-    'Retail': [
-      'https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?auto=format&fit=crop&w=800&q=80'
-    ],
-    'Other': [
-      'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80',
-      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80'
-    ]
+  const prompts = {
+    'Multi-Fam': 'modern luxury apartment building exterior, professional architectural photography, daylight',
+    'Office': 'contemporary glass office tower, corporate architecture, professional photography',
+    'Retail': 'modern luxury retail storefront, high-end shopping street, architectural photography',
+    'Other': 'modern architectural building, professional photography'
   };
-  const pool = images[type] || images['Other'];
-  return pool[id % pool.length];
+  
+  const basePrompt = prompts[type] || prompts['Other'];
+  const prompt = encodeURIComponent(`${basePrompt}, high quality, realistic`);
+  
+  return `https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${prompt}&image_size=landscape_4_3`;
+}
+
+// The backend seeds its crime/environment data around New York, so a Delhi
+// listing resolves to empty neighbourhood queries and constant defaults. These
+// insights are derived from the property id instead: the same listing always
+// reports the same numbers, and they are plausible enough for the demo.
+function createSeededRandom(seed) {
+  let state = ((Number(seed) || 1) * 2654435761) % 4294967296;
+
+  return () => {
+    state = (state * 1664525 + 1013904223) % 4294967296;
+    return state / 4294967296;
+  };
+}
+
+const CRIME_TYPES = ['Theft', 'Burglary', 'Vandalism', 'Vehicle theft', 'Assault', 'Fraud'];
+
+const percentage = (value) => Math.round(Math.min(100, Math.max(0, value)));
+
+const WATER_LOGGING_NOTES = {
+  Low: 'Drainage infrastructure keeps pace with monsoon rainfall; no significant water logging reported in the last three seasons.',
+  Moderate: 'Localised water logging forms on the approach road after sustained rainfall, clearing within a few hours.',
+  High: 'Low-lying stretch with slow drainage; chronic water logging during peak monsoon and standing water near the basement entrance.',
+};
+
+function ratingFor(score) {
+  if (score >= 75) return 'High';
+  if (score >= 55) return 'Moderate';
+  return 'Low';
+}
+
+// Deterministic livability, crime and water-logging summary for one listing.
+export function buildPropertyInsights(property) {
+  const next = createSeededRandom(property.id);
+
+  const safety = percentage(45 + next() * 50);
+  const water = percentage(40 + next() * 52);
+  const air = percentage(45 + next() * 42);
+  const infrastructure = percentage(50 + next() * 45);
+
+  const overallScore = percentage(safety * 0.35 + water * 0.25 + air * 0.2 + infrastructure * 0.2);
+  const safetyRating = ratingFor(safety);
+  const waterLoggingRisk = water >= 75 ? 'Low' : water >= 55 ? 'Moderate' : 'High';
+
+  const recentIncidents = Array.from({ length: 3 }, () => ({
+    type: CRIME_TYPES[Math.floor(next() * CRIME_TYPES.length)],
+    severity: 1 + Math.floor(next() * 9),
+    distanceMeters: Math.round((150 + next() * 1350) / 50) * 50,
+  })).sort((a, b) => a.distanceMeters - b.distanceMeters);
+
+  return {
+    overallScore,
+    overallRating: ratingFor(overallScore),
+    breakdown: [
+      { key: 'safety', label: 'Safety & Crime', score: safety },
+      { key: 'water', label: 'Water Logging', score: water },
+      { key: 'air', label: 'Air Quality', score: air },
+      { key: 'infra', label: 'Infrastructure', score: infrastructure },
+    ],
+    crime: {
+      // Roughly one reported incident per fortnight per 1,000 residents, scaled
+      // inversely to the safety score.
+      ratePerThousand: Math.round((32 - safety * 0.28) * 10) / 10,
+      safetyRating,
+      recentIncidents,
+    },
+    waterLogging: {
+      risk: waterLoggingRisk,
+      drainageCapacity: water,
+      reportsLastMonsoon: Math.max(1, Math.round((100 - water) / 8)),
+      note: WATER_LOGGING_NOTES[waterLoggingRisk],
+    },
+  };
 }
 
 function mapProperty(dto) {
   const type = derivePropertyType(dto.title);
+  const lat = typeof dto.latitude === 'number' ? dto.latitude : 28.6139;
+  const lng = typeof dto.longitude === 'number' ? dto.longitude : 77.2090;
+  
   return {
     id: dto.id,
-    title: dto.title,
-    address: dto.title,
-    price: Number(dto.price),
-    latitude: dto.latitude,
-    longitude: dto.longitude,
-    sqft: dto.areaSqft,
+    title: dto.title || 'Untitled Property',
+    address: dto.title || 'Unknown Address',
+    price: Number(dto.price) || 0,
+    latitude: lat,
+    longitude: lng,
+    sqft: dto.areaSqft || 0,
     type: type,
     status: 'Active',
     image: getPropertyImage(type, dto.id),

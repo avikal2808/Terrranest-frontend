@@ -99,7 +99,7 @@ export default function TopNavBar({ user, onSearch, onFilterChange, onAnalyze, o
               <img 
                 alt="User profile avatar" 
                 className="h-full w-full object-cover" 
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&q=80" 
+                src={`https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent('professional corporate headshot of a person, neutral background, high quality')}&image_size=square`} 
               />
             </button>
             {activeDropdown === 'profile' && (

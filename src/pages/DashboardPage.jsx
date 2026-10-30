@@ -3,11 +3,13 @@ import TopNavBar from '../components/dashboard/TopNavBar'
 import SideNavBar from '../components/dashboard/SideNavBar'
 import MapView from '../components/dashboard/MapView'
 import PropertyList from '../components/dashboard/PropertyList'
+import PropertyDetailPage from './PropertyDetailPage'
 import { apiService } from '../services/api'
 
 export default function DashboardPage({ user, onLogout }) {
   const [properties, setProperties] = useState([])
   const [selectedPropertyId, setSelectedPropertyId] = useState(null)
+  const [detailProperty, setDetailProperty] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
@@ -71,6 +73,11 @@ export default function DashboardPage({ user, onLogout }) {
     alert('Initiating real estate valuation analysis for the active listings grid...')
   }
 
+  // Opening a listing replaces the dashboard with its own full-screen page.
+  if (detailProperty) {
+    return <PropertyDetailPage property={detailProperty} onBack={() => setDetailProperty(null)} />
+  }
+
   return (
     <div className="bg-background h-screen flex flex-col overflow-hidden text-on-background select-none">
       {/* Top Navigation */}
@@ -101,6 +108,7 @@ export default function DashboardPage({ user, onLogout }) {
             error={error}
             selectedPropertyId={selectedPropertyId}
             onSelectProperty={setSelectedPropertyId}
+            onOpenProperty={setDetailProperty}
           />
         </div>
       </main>

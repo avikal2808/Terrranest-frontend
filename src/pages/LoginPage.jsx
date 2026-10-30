@@ -51,7 +51,7 @@ export default function LoginPage({ onLoginSuccess }) {
         <div 
           className="absolute inset-0 bg-cover bg-center" 
           style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=1200&q=80')" 
+            backgroundImage: `url('https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=${encodeURIComponent('modern architectural landscape, city skyline, luxury real estate background, professional photography')}&image_size=landscape_16_9')` 
           }}
         ></div>
         <div className="absolute inset-0 bg-gradient-to-r from-transparent to-surface-container-lowest/50"></div>

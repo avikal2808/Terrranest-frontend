@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 
-export default function PropertyCard({ property, isSelected, onSelect }) {
+export default function PropertyCard({ property, isSelected, onOpen }) {
   const [bookmarked, setBookmarked] = useState(false)
 
   const handleBookmarkClick = (e) => {
@@ -19,7 +19,7 @@ export default function PropertyCard({ property, isSelected, onSelect }) {
 
   return (
     <div 
-      onClick={onSelect}
+      onClick={() => onOpen(property)}
       className={`bg-surface-container-lowest border rounded-xl overflow-hidden cursor-pointer group transition-all duration-200 ${
         isSelected 
           ? 'border-primary ring-2 ring-primary/20 shadow-md' 
