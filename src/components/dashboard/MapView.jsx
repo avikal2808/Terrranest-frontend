@@ -1,29 +1,6 @@
-import React, { useEffect } from 'react'
-import { MapContainer, TileLayer, Marker, useMap, ZoomControl } from 'react-leaflet'
-import L from 'leaflet'
+import React from 'react'
 
-// Fix Leaflet icon issue
-import 'leaflet/dist/leaflet.css'
-
-// Custom Marker Component to handle panning/zooming to selection
-function MapController({ selectedProperty }) {
-  const map = useMap()
-  
-  useEffect(() => {
-    if (selectedProperty) {
-      map.setView([selectedProperty.latitude, selectedProperty.longitude], 15, {
-        animate: true,
-        duration: 1.0
-      })
-    }
-  }, [selectedProperty, map])
-  
-  return null
-}
-
-export default function MapView({ properties, selectedPropertyId, onSelectProperty }) {
-  const selectedProperty = properties.find(p => p.id === selectedPropertyId)
-
+export default function MapView({ properties = [], selectedPropertyId, onSelectProperty }) {
   // Format price for the map bubble in Indian numbering (Cr/L)
   const formatMapPrice = (price) => {
     if (price >= 10000000) return `₹${(price / 10000000).toFixed(1)} Cr`
@@ -31,65 +8,98 @@ export default function MapView({ properties, selectedPropertyId, onSelectProper
     return `₹${price.toLocaleString('en-IN')}`
   }
 
-  // Create a custom div icon for the pins
-  const createCustomIcon = (property, isSelected) => {
-    const formattedPrice = formatMapPrice(property.price)
-    
-    return L.divIcon({
-      className: 'custom-div-icon',
-      html: `
-        <div class="flex flex-col items-center group cursor-pointer transform -translate-x-1/2 -translate-y-1/2">
-          <div class="font-data-mono text-[10px] px-1.5 py-0.5 rounded shadow-md font-bold whitespace-nowrap transition-all duration-200 
-            ${isSelected 
-              ? 'bg-inverse-surface text-on-error ring-2 ring-primary-container z-50 scale-110' 
-              : 'bg-primary text-on-primary group-hover:bg-primary-container group-hover:text-on-primary-container'}">
-            ${formattedPrice}
-          </div>
-          <div class="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[6px] 
-            ${isSelected ? 'border-t-inverse-surface' : 'border-t-primary group-hover:border-t-primary-container'}">
-          </div>
-        </div>
-      `,
-      iconSize: [0, 0],
-      iconAnchor: [0, 0]
-    })
-  }
-
-  // Calculate center of all properties
-  const center = properties.length > 0 
-    ? [properties[0].latitude, properties[0].longitude] 
-    : [28.6139, 77.2090] // Delhi default
+  // Local Delhi map image served from the public folder
+  const mapImageUrl = '/delhi-map.jpg';
 
   return (
     <div className="w-full lg:w-[70%] h-[50vh] lg:h-full relative border-b lg:border-b-0 lg:border-r border-outline-variant bg-surface-container overflow-hidden">
-      <MapContainer 
-        center={center} 
-        zoom={12} 
-        className="h-full w-full z-0"
-        zoomControl={false}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+      {/* Static Map Background */}
+      <div className="absolute inset-0 w-full h-full bg-surface-container-low">
+        <img 
+          src={mapImageUrl} 
+          alt="Delhi Map View" 
+          className="w-full h-full object-cover"
         />
-        
-        <ZoomControl position="topright" />
-        <MapController selectedProperty={selectedProperty} />
+        {/* Subtle texture overlay */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.05)_100%)]"></div>
+      </div>
 
-        {properties.map((property) => (
-          <Marker
-            key={property.id}
-            position={[property.latitude, property.longitude]}
-            icon={createCustomIcon(property, selectedPropertyId === property.id)}
-            eventHandlers={{
-              click: () => onSelectProperty(property.id),
-            }}
-          />
-        ))}
-      </MapContainer>
+      {/* High-tech Grid Overlay */}
+      <div className="absolute inset-0 pointer-events-none z-10 bg-[linear-gradient(rgba(0,108,73,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,108,73,0.02)_1px,transparent_1px)] bg-[size:50px_50px]"></div>
 
-      {/* High-tech overlay to maintain consistency with the app's aesthetic */}
-      <div className="absolute inset-0 pointer-events-none z-10 bg-[linear-gradient(rgba(0,108,73,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,108,73,0.02)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+      {/* Property Markers Overlay */}
+      <div className="absolute inset-0 z-20">
+        {properties.map((property) => {
+          // These offsets are calculated in api.js:withMapOffsets
+          if (!property.latOffset || !property.lngOffset) return null;
+          
+          const isSelected = selectedPropertyId === property.id;
+          const formattedPrice = formatMapPrice(property.price);
+
+          return (
+            <div
+              key={property.id}
+              onClick={(e) => {
+                e.stopPropagation();
+                onSelectProperty(property.id);
+              }}
+              style={{
+                top: property.latOffset,
+                left: property.lngOffset,
+                transform: 'translate(-50%, -100%)',
+              }}
+              className={`absolute cursor-pointer transition-all duration-300 ${isSelected ? 'z-50' : 'z-20 hover:z-40'}`}
+            >
+              <div className="flex flex-col items-center group">
+                <div className={`font-data-mono text-[10px] px-2 py-1 rounded shadow-xl font-bold whitespace-nowrap transition-all duration-200 
+                  ${isSelected 
+                    ? 'bg-inverse-surface text-on-error ring-2 ring-primary scale-110 shadow-primary/20' 
+                    : 'bg-primary text-on-primary group-hover:bg-primary-container group-hover:text-on-primary-container shadow-md'}`}>
+                  {formattedPrice}
+                </div>
+                
+                {/* Marker Pin Point */}
+                <div className={`w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[8px] transition-colors
+                  ${isSelected ? 'border-t-inverse-surface' : 'border-t-primary group-hover:border-t-primary-container'}`}>
+                </div>
+                
+                {/* Location Dot */}
+                <div className={`w-2 h-2 rounded-full mt-[-4px] transition-all duration-300 ${
+                  isSelected 
+                    ? 'bg-primary ring-4 ring-primary/20 animate-pulse' 
+                    : 'bg-primary/40 group-hover:bg-primary/60'
+                }`}></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Mock Map Controls */}
+      <div className="absolute top-4 right-4 z-30 flex flex-col gap-2">
+        <div className="bg-surface-container-lowest/80 backdrop-blur-sm border border-outline-variant rounded-lg p-1 shadow-md flex flex-col">
+          <button className="p-2 hover:bg-surface-container-low text-secondary transition-colors rounded-md">
+            <span className="material-symbols-outlined text-[20px]">add</span>
+          </button>
+          <div className="h-[1px] bg-outline-variant mx-1"></div>
+          <button className="p-2 hover:bg-surface-container-low text-secondary transition-colors rounded-md">
+            <span className="material-symbols-outlined text-[20px]">remove</span>
+          </button>
+        </div>
+        <button className="bg-surface-container-lowest/80 backdrop-blur-sm border border-outline-variant rounded-lg p-2 shadow-md text-secondary hover:bg-surface-container-low transition-colors">
+          <span className="material-symbols-outlined text-[20px]">my_location</span>
+        </button>
+      </div>
+
+      {/* Coordinate Legend */}
+      <div className="absolute bottom-4 left-4 z-30 bg-surface-container-lowest/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-outline-variant text-[10px] font-data-mono text-secondary flex items-center gap-4">
+        <div className="flex items-center gap-1">
+          <span className="text-primary/60">LAT:</span> 28.6139° N
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="text-primary/60">LNG:</span> 77.2090° E
+        </div>
+      </div>
     </div>
   )
 }
