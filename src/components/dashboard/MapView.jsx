@@ -1,18 +1,25 @@
 import React from 'react'
 
 export default function MapView({ properties, selectedPropertyId, onSelectProperty }) {
+  // Format price for the map bubble in Indian numbering (Cr/L)
+  const formatMapPrice = (price) => {
+    if (price >= 10000000) return `₹${(price / 10000000).toFixed(1)} Cr`
+    if (price >= 100000) return `₹${(price / 100000).toFixed(1)} L`
+    return `₹${price.toLocaleString('en-IN')}`
+  }
+
   return (
     <div className="w-full lg:w-[70%] h-[50vh] lg:h-full relative border-b lg:border-b-0 lg:border-r border-outline-variant bg-surface-container">
-      {/* Map Background image */}
+      {/* Map Background image - Centered on Delhi Grid */}
       <div className="absolute inset-0 bg-surface-container overflow-hidden">
         <div 
-          className="w-full h-full bg-cover bg-center opacity-60" 
+          className="w-full h-full bg-cover bg-center opacity-40" 
           style={{ 
-            backgroundImage: "url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&w=1600&q=80')" 
+            backgroundImage: "url('https://coresg-normal.trae.ai/api/ide/v1/text_to_image?prompt=modern+minimalistic+city+map+grid+of+New+Delhi+India+cartographic+style+clean+lines+emerald+and+white+theme&image_size=landscape_16_9')" 
           }}
         ></div>
         {/* Abstract grids overlays to look high-tech/cartographic */}
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,108,73,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,108,73,0.03)_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,108,73,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,108,73,0.05)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
       </div>
 
       {/* Map Control Buttons */}
@@ -31,7 +38,7 @@ export default function MapView({ properties, selectedPropertyId, onSelectProper
       {/* Dynamic Map Pins */}
       {properties.map((property) => {
         const isSelected = selectedPropertyId === property.id
-        const formattedPrice = `$${(property.price / 1000000).toFixed(1)}M`
+        const formattedPrice = formatMapPrice(property.price)
         
         return (
           <div 
